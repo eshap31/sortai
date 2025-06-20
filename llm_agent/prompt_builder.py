@@ -1,24 +1,26 @@
-def build_prompt(invoice_text: str, known_llcs: list[str]):
+def build_prompt(invoice_text: str, llc_metadata: dict) -> str:
     """
-      function get's the text of the invoice, and the list of llcs
-      and builds and returns a natural language prompt for GPT
-      :params invoice_text: the invoice in text form
-      :type invoice_text: string
-      :params known_llcs: list of llcs that the company manages
-      :type known_llcs: list[str]
-      :return: natural language prompt for GPT
-      :rtype: str
+    Builds a prompt for the LLM to classify an invoice based on known LLCs and their associated addresses.
+    :param invoice_text: The raw text of the invoice to be classified.
+    :type invoice_text: str
+    :param llc_metadata: A dictionary mapping LLC names to their associated addresses.
+    :type llc_metadata: dict
+    :return: A formatted prompt string for the LLM.
+    :rtype: str
     """
+
+    formatted_llcs = "\n".join([
+        f"- {llc}\n  - Associated addresses: {', '.join(addresses)}"
+        for llc, addresses in llc_metadata.items()
+    ])
+
     prompt = f"""
-You are an intelligent invoice classification agent.
+You are an invoice classification agent.
 
-Your task is to:
-1. Extract the invoice fields from the text.
-2. Match the invoice to the correct LLC from the known list.
-3. Return a JSON object with the fields: `llc_name`, `invoice_summary`, and `reasoning`.
+Given a list of LLCs with their associated addresses, and the raw text of an invoice, extract the invoice fields and assign the correct LLC based on address or vendor match.
 
-### Known LLCs:
-{chr(10).join(['- ' + llc for llc in known_llcs])}
+### Known LLCs and Addresses:
+{formatted_llcs}
 
 ### Invoice Text:
 \"\"\"
@@ -37,6 +39,7 @@ Your task is to:
   "reasoning": string
 }}
 
-Only return the JSON.
-    """
+Only return valid JSON.
+"""
     return prompt.strip()
+

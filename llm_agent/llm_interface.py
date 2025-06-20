@@ -8,16 +8,18 @@ from llm_agent.prompt_builder import build_prompt
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def classify_invoice(invoice_text: str, known_llcs: list[str]) -> dict:
+def classify_invoice(invoice_text: str, llc_metadata: list[str]) -> dict:
     """
     :param invoice_text: the text of the invoice
-    :param known_llcs: list of llcs that the company manages
+    :type invoice_text: str
+    :param llc_metadata: a list of known LLCs and their associated addresses
+    :type llc_metadata: list[str]
     :return: returns the GPT response (converts from json to python dictionary)
     :rtype: dict
     """
 
     # create the prompt, using the build_prompt function
-    prompt = build_prompt(invoice_text, known_llcs)
+    prompt = build_prompt(invoice_text, llc_metadata)
 
     # send the prompt to OpenAI
     response = client.chat.completions.create(
