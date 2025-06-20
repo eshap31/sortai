@@ -1,4 +1,14 @@
-def build_prompt(invoice_text: str, known_llcs: list[str]) -> str:
+def build_prompt(invoice_text: str, known_llcs: list[str]):
+    """
+      function get's the text of the invoice, and the list of llcs
+      and builds and returns a natural language prompt for GPT
+      :params invoice_text: the invoice in text form
+      :type invoice_text: string
+      :params known_llcs: list of llcs that the company manages
+      :type known_llcs: list[str]
+      :return: natural language prompt for GPT
+      :rtype: str
+    """
     prompt = f"""
 You are an intelligent invoice classification agent.
 

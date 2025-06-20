@@ -11,5 +11,7 @@ known_llcs = [
     "Grove Apartments LLC"
 ]
 
+# call the function that sends the prompt, and save the result (dictionary)
+# to the result variable
 result = classify_invoice(invoice_text, known_llcs)
 print(result)
