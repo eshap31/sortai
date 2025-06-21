@@ -6,7 +6,10 @@ import shutil
 from ocr.ocr_engine import extract_text_from_image, extract_text_from_pdf
 from llm_agent.llm_interface import classify_invoice
 from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
+from sheets_integration import initialize_sheets_client, append_invoice_to_llc_tab
 
+SPREADSHEET_NAME = os.getenv("SPREADSHEET_NAME", "SortAI Invoices")
 
 app = FastAPI()
 
@@ -25,22 +28,21 @@ async def home():
         return f.read()
 
 @app.post("/upload")
-async def upload_invoices(
-    files: List[UploadFile] = File(...)):
+async def upload_invoices(files: List[UploadFile] = File(...)):
     """
     Endpoint to upload multiple invoice files (PDF or image) and classify them using an LLM.
-
-    Each file is processed using OCR to extract text, and then classified into the correct LLC
-    based on known metadata (e.g., addresses tied to each LLC). Results for each file are returned
-    as a list of dictionaries.
-
-    :param files: A list of uploaded invoice files (PDFs or images).
-    :type files: List[UploadFile]
-    :return: A list of results for each invoice, including the filename and either a classification result or an error.
-    :rtype: List[dict]
+    Results are automatically logged to Google Sheets organized by LLC.
     """
-
     results = []
+    
+    # Initialize Google Sheets client once for all uploads
+    try:
+        sheets_client = initialize_sheets_client()
+        spreadsheet = sheets_client.open(SPREADSHEET_NAME)
+        sheets_enabled = True
+    except Exception as e:
+        print(f"⚠️ Google Sheets initialization failed: {str(e)}")
+        sheets_enabled = False
 
     for file in files:
         temp_path = f"temp_{file.filename}"
@@ -48,13 +50,34 @@ async def upload_invoices(
             shutil.copyfileobj(file.file, buffer)
 
         try:
+            # OCR processing
             if file.filename.lower().endswith(".pdf"):
                 text = extract_text_from_pdf(temp_path)
             else:
                 text = extract_text_from_image(temp_path)
 
+            # LLM classification
             result = classify_invoice(text, llc_metadata)
             print(f"✅ Processed {file.filename}: {result}")
+            
+            # Prepare data for Google Sheets
+            if sheets_enabled and result.get("llc_name"):
+                invoice_data = {
+                    "filename": file.filename,
+                    "vendor": result.get("invoice_summary", {}).get("vendor", ""),
+                    "amount": result.get("invoice_summary", {}).get("amount", ""),
+                    "date": result.get("invoice_summary", {}).get("date", ""),
+                    "address": result.get("invoice_summary", {}).get("address", ""),
+                    "order_number": result.get("invoice_summary", {}).get("order_number", ""),
+                    "invoice_number": result.get("invoice_summary", {}).get("invoice_number", ""),
+                    "reasoning": result.get("reasoning", "")
+                }
+                
+                try:
+                    append_invoice_to_llc_tab(spreadsheet, result["llc_name"], invoice_data)
+                except Exception as sheets_error:
+                    print(f"⚠️ Failed to log to sheets: {str(sheets_error)}")
+            
             results.append({"filename": file.filename, "result": result})
 
         except Exception as e:
