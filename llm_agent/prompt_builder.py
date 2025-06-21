@@ -34,12 +34,14 @@ Given a list of LLCs with their associated addresses, and the raw text of an inv
     "vendor": string,
     "amount": string,
     "date": string,
-    "address": string
+    "address": string,
+    "invoice_number": string,
+    "order_number": string
   }},
   "reasoning": string
 }}
 
+If any fields like invoice number or order number are not available, return null or an empty string.
 Only return valid JSON.
 """
     return prompt.strip()
-

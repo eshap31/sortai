@@ -5,6 +5,8 @@ import os
 import shutil
 from ocr.ocr_engine import extract_text_from_image, extract_text_from_pdf
 from llm_agent.llm_interface import classify_invoice
+from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI()
 
@@ -13,6 +15,9 @@ llc_metadata = {
     "Grove Apartments LLC": ["44 Grove St Cambridge MA 02138"],
     "Elmhurt Holdings LLC": ["9232 50th Ave 3RD Floor, Elmhurst, NY 11373"]
 }
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 
 @app.get("/", response_class=HTMLResponse)
 async def home():

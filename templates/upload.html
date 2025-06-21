@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sort.ai - Upload Invoices</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <!-- You can also use other formats like PNG if your icon is named differently:
+         <link rel="icon" type="image/png" href="logo.png"> -->
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -18,6 +21,12 @@
         .header {
             text-align: center;
             margin-bottom: 40px;
+        }
+
+        .logo {
+            height: 64px;
+            width: auto;
+            margin-bottom: 16px;
         }
 
         .header h1 {
@@ -428,7 +437,8 @@
 </head>
 <body>
     <div class="header">
-        <h1>🎯 Sort.ai</h1>
+        <img src="/static/logo.png" alt="Sort.ai Logo" class="logo">
+        <h1>Sort.ai</h1>
         <p>AI-powered invoice classification and sorting</p>
     </div>
 
@@ -717,6 +727,14 @@
                         <div class="detail-item">
                             <div class="detail-label">Address</div>
                             <div class="detail-value">${invoiceData.invoice_summary.address || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Invoice #</div>
+                            <div class="detail-value">${invoiceData.invoice_summary.invoice_number || 'None'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Order #</div>
+                            <div class="detail-value">${invoiceData.invoice_summary.order_number || 'None'}</div>
                         </div>
                     </div>
                     
