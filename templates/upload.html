@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sort.ai - Upload Invoices</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #1e293b;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .file-input:hover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        .file-previews {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .file-previews.has-files {
+            display: block;
+        }
+
+        .previews-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .previews-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .file-count {
+            background: #e2e8f0;
+            color: #475569;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .preview-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .preview-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .preview-filename {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #334155;
+            word-break: break-word;
+            line-height: 1.3;
+        }
+
+        .preview-size {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .add-more-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .add-more-btn:hover {
+            background: #4b5563;
+        }
+
+        .upload-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+
+        .upload-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+        }
+
+        .upload-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #3b82f6;
+            font-weight: 500;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .results-header h2 {
+            color: #1e293b;
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .results-count {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .invoice-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #10b981;
+        }
+
+        .invoice-card.error {
+            border-left-color: #ef4444;
+        }
+
+        .invoice-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .filename {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .llc-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #3b82f6;
+            margin-bottom: 16px;
+        }
+
+        .invoice-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 3px solid #e2e8f0;
+        }
+
+        .detail-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+
+        .reasoning-section {
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .reasoning-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .reasoning-text {
+            color: #334155;
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        .error-message {
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 3px solid #dc2626;
+            font-weight: 500;
+        }
+
+        .clear-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .clear-btn:hover {
+            background: #4b5563;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .upload-section {
+                padding: 20px;
+            }
+            
+            .invoice-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Sort.ai</h1>
+        <p>AI-powered invoice classification and sorting</p>
+    </div>
+
+    <div class="upload-section">
+        <form id="uploadForm" class="upload-form">
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" class="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp,.tiff">
+            </div>
+            
+            <div id="filePreviews" class="file-previews">
+                <div class="previews-header">
+                    <span class="previews-title">📄 Selected Files</span>
+                    <span id="fileCount" class="file-count">0 files</span>
+                </div>
+                <div id="previewGrid" class="preview-grid"></div>
+                <div class="upload-controls">
+                    <button type="button" id="addMoreBtn" class="add-more-btn">
+                        ➕ Add More Files
+                    </button>
+                    <button type="submit" id="uploadBtn" class="upload-btn">
+                        📤 Upload & Classify Invoices
+                    </button>
+                </div>
+            </div>
+            
+            <button type="submit" id="uploadBtnInitial" class="upload-btn" style="display: none;">
+                📤 Upload & Classify Invoices
+            </button>
+        </form>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            Processing your invoices...
+        </div>
+    </div>
+
+    <div id="resultsSection" class="results-section">
+        <div class="results-header">
+            <h2>📋 Classification Results</h2>
+            <span id="resultsCount" class="results-count">0 files</span>
+        </div>
+        <div id="resultsContainer"></div>
+        <button id="clearBtn" class="clear-btn">Clear Results</button>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadBtnInitial = document.getElementById('uploadBtnInitial');
+        const addMoreBtn = document.getElementById('addMoreBtn');
+        const loading = document.getElementById('loading');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const resultsCount = document.getElementById('resultsCount');
+        const clearBtn = document.getElementById('clearBtn');
+        const filePreviews = document.getElementById('filePreviews');
+        const previewGrid = document.getElementById('previewGrid');
+        const fileCount = document.getElementById('fileCount');
+
+        // Store selected files
+        let selectedFiles = new Map();
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (selectedFiles.size === 0) {
+                alert('Please select at least one file to upload.');
+                return;
+            }
+
+            // Show loading state
+            uploadBtn.disabled = true;
+            uploadBtnInitial.disabled = true;
+            addMoreBtn.disabled = true;
+            loading.style.display = 'block';
+            resultsSection.style.display = 'none';
+
+            try {
+                const formData = new FormData();
+                selectedFiles.forEach((file, id) => {
+                    formData.append('files', file);
+                });
+
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const results = await response.json();
+                displayResults(results);
+
+            } catch (error) {
+                console.error('Upload failed:', error);
+                alert('Upload failed: ' + error.message);
+            } finally {
+                // Hide loading state
+                uploadBtn.disabled = false;
+                uploadBtnInitial.disabled = false;
+                addMoreBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const newFiles = Array.from(e.target.files);
+            newFiles.forEach(addFileToSelection);
+            e.target.value = ''; // Reset input so same files can be selected again
+        });
+
+        addMoreBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        function addFileToSelection(file) {
+            // Create unique ID for the file
+            const fileId = `${file.name}_${file.size}_${Date.now()}`;
+            
+            // Check if file already exists (by name and size)
+            const exists = Array.from(selectedFiles.values()).some(
+                existingFile => existingFile.name === file.name && existingFile.size === file.size
+            );
+            
+            if (exists) {
+                alert(`File "${file.name}" is already selected.`);
+                return;
+            }
+
+            selectedFiles.set(fileId, file);
+            createPreviewCard(fileId, file);
+            updateFileCount();
+            updateUI();
+        }
+
+        function removeFile(fileId) {
+            selectedFiles.delete(fileId);
+            document.getElementById(`preview-${fileId}`).remove();
+            updateFileCount();
+            updateUI();
+        }
+
+        function createPreviewCard(fileId, file) {
+            const card = document.createElement('div');
+            card.className = 'preview-card';
+            card.id = `preview-${fileId}`;
+
+            const previewImage = document.createElement('div');
+            previewImage.className = 'preview-image';
+
+            // Create preview based on file type
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.className = 'preview-image';
+                img.style.objectFit = 'cover';
+                img.style.width = '100%';
+                img.style.height = '120px';
+                img.style.borderRadius = '6px';
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+                
+                card.appendChild(img);
+            } else if (file.type === 'application/pdf') {
+                previewImage.textContent = '📄';
+                previewImage.style.backgroundColor = '#fee2e2';
+                previewImage.style.color = '#dc2626';
+                card.appendChild(previewImage);
+            } else {
+                previewImage.textContent = '📄';
+                card.appendChild(previewImage);
+            }
+
+            const filename = document.createElement('div');
+            filename.className = 'preview-filename';
+            filename.textContent = file.name;
+            filename.title = file.name; // Tooltip for long names
+
+            const fileSize = document.createElement('div');
+            fileSize.className = 'preview-size';
+            fileSize.textContent = formatFileSize(file.size);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn';
+            removeBtn.innerHTML = '×';
+            removeBtn.title = 'Remove file';
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                removeFile(fileId);
+            });
+
+            card.appendChild(filename);
+            card.appendChild(fileSize);
+            card.appendChild(removeBtn);
+
+            previewGrid.appendChild(card);
+        }
+
+        function updateFileCount() {
+            const count = selectedFiles.size;
+            fileCount.textContent = `${count} file${count !== 1 ? 's' : ''}`;
+        }
+
+        function updateUI() {
+            const hasFiles = selectedFiles.size > 0;
+            
+            if (hasFiles) {
+                filePreviews.classList.add('has-files');
+                uploadBtnInitial.style.display = 'none';
+            } else {
+                filePreviews.classList.remove('has-files');
+                uploadBtnInitial.style.display = 'block';
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function displayResults(results) {
+            resultsContainer.innerHTML = '';
+            resultsCount.textContent = `${results.length} file${results.length !== 1 ? 's' : ''}`;
+
+            results.forEach(result => {
+                const card = createInvoiceCard(result);
+                resultsContainer.appendChild(card);
+            });
+
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function createInvoiceCard(result) {
+            const card = document.createElement('div');
+            card.className = `invoice-card ${result.error ? 'error' : ''}`;
+
+            if (result.error) {
+                card.innerHTML = `
+                    <div class="invoice-header">
+                        <div class="filename">
+                            ❌ ${result.filename}
+                        </div>
+                        <div class="status-badge status-error">Error</div>
+                    </div>
+                    <div class="error-message">
+                        ${result.error}
+                    </div>
+                `;
+            } else {
+                const invoiceData = result.result;
+                card.innerHTML = `
+                    <div class="invoice-header">
+                        <div class="filename">
+                            📄 ${result.filename}
+                        </div>
+                        <div class="status-badge status-success">Classified</div>
+                    </div>
+                    
+                    <div class="llc-name">
+                        🏢 ${invoiceData.llc_name}
+                    </div>
+                    
+                    <div class="invoice-details">
+                        <div class="detail-item">
+                            <div class="detail-label">Vendor</div>
+                            <div class="detail-value">${invoiceData.invoice_summary.vendor || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Amount</div>
+                            <div class="detail-value">${invoiceData.invoice_summary.amount || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Date</div>
+                            <div class="detail-value">${invoiceData.invoice_summary.date || 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Address</div>
+                            <div class="detail-value">${invoiceData.invoice_summary.address || 'N/A'}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="reasoning-section">
+                        <div class="reasoning-label">
+                            💡 AI Reasoning
+                        </div>
+                        <div class="reasoning-text">
+                            ${invoiceData.reasoning || 'No reasoning provided'}
+                        </div>
+                    </div>
+                `;
+            }
+
+            return card;
+        }
+
+        clearBtn.addEventListener('click', () => {
+            resultsSection.style.display = 'none';
+            selectedFiles.clear();
+            previewGrid.innerHTML = '';
+            updateFileCount();
+            updateUI();
+        });
+
+        // Initialize UI
+        updateUI();
+    </script>
+</body>
+</html>

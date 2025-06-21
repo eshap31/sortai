@@ -16,7 +16,7 @@ llc_metadata = {
 
 @app.get("/", response_class=HTMLResponse)
 async def home():
-    with open("upload.html", "r") as f:
+    with open("templates/upload.html", "r", encoding="utf-8") as f:
         return f.read()
 
 @app.post("/upload")
